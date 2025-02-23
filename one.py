@@ -1,18 +1,27 @@
+'''
+Feedback Neural Network
+Rick Howell
+the.rickhowell@gmail.com
+
+This program is designed to implement 'feeling' into the classic neural network model
+We use filters and oscillators to facilitate this
+'''
+
 import numpy as np
 import cv2
-import random
+import textwrap
 import math
 import time
 from typing import List, Tuple, Dict
 
-WINDOW_NAME = 'hello world'
+WINDOW_NAME = 'Feedback Neural Network'
 NUM_AGENTS = 20
 INIT_FOOD = 10
 INIT_ENERGY = 100
 
-main_width = 700
-info_width = 500
-height = 700
+main_width = 800
+info_width = 200
+height = 800
 
 specimen_idx = 0
 
@@ -43,7 +52,7 @@ class Agent:
         self.hidden_layers = hidden_layers
 
         self.input_nodes = ['age', 'velocity', 'near_food', 'energy', 'tsb', 'tsf', 'noise']
-        self.output_nodes = ['vel_x', 'vel_y', 'vel', 'eat', 'mitosis', 'main_freq', 'mitosis']
+        self.output_nodes = ['vel_x', 'vel_y', 'vel', 'eat', 'mitosis', 'main_freq']
         self._hidden_nodes = ['identity', 'bias', 'invert', 'LP', 'HP', 'fm', 'am', 'noise']
         self.hidden_nodes = []
 
@@ -300,7 +309,7 @@ def get_inputs(a: Agent) -> Dict[str, float]:
 
 def draw():
     # map = np.zeros((main_width, height, 3), dtype=np.uint8)
-    map = np.full((main_width, height, 3), (130, 100, 10), dtype=np.uint8)
+    map = np.full((main_width, height, 3), (80, 40, 10), dtype=np.uint8)
     # draw food
     for f in food_positions:
         cv2.circle(map, f, 3, (120, 255, 180), -1, lineType=cv2.LINE_AA)
@@ -381,15 +390,21 @@ def update_info():
     info = np.full((height, info_width, 3), (20, 20, 20), dtype=np.uint8)  # Darker background
     
     # Draw basic stats
-    cv2.putText(info, 'Age:    ' + str(round(specimen.age, 2)), (10, 20), font, 1, (255, 255, 255))
-    cv2.putText(info, 'Energy: ' + str(round(specimen.energy, 2)), (10, 40), font, 1, (255, 255, 255))
-    cv2.putText(info, 'Freq:   ' + str(round(specimen.freq_main, 2)), (10, 60), font, 1, (255, 255, 255))
-    
+    cv2.putText(info, 'Age:     ' + str(round(specimen.age, 2)), (10, 20), font, 1, (255, 255, 255))
+    cv2.putText(info, 'Energy:  ' + str(round(specimen.energy, 2)), (10, 40), font, 1, (255, 255, 255))
+    cv2.putText(info, 'Freq:    ' + str(round(specimen.freq_main, 2)), (10, 60), font, 1, (255, 255, 255))
+    cv2.putText(info, 'Velocity:' + str(np.round(specimen.vel, 2)), (10, 80), font, 1, (255, 255, 255))
     # Draw genome info
-    cv2.putText(info, f'Genome Length: {len(specimen.genome)}', (10, 80), font, 1, (255, 255, 255))
-    
+
+    cv2.putText(info, f'Genome:', (10, 100), font, 1, (255, 255, 255))
+    wrap_text = textwrap.wrap(specimen.genome, 6)
+    space = 1
+    for i in enumerate(wrap_text):
+        cv2.putText(info, str(i), (10, 13 * (space) + 100), font, 1, (255, 255, 255))
+        space += 1
+
     # Draw the network
-    draw_network(specimen, info, 120)
+    # draw_network(specimen, info, 120)
 
 ################ MAIN LOOP #########################
 # ================================================ #
